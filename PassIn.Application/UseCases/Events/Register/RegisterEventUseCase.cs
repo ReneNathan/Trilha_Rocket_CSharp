@@ -1,5 +1,7 @@
 ﻿using PassIn.Communication.Requests;
 using PassIn.Exceptions;
+using PassIn.Infrastructure;
+using PassIn.Infrastructure.Entidades;
 
 namespace PassIn.Application.UseCases.Events.Register
 {
@@ -8,7 +10,23 @@ namespace PassIn.Application.UseCases.Events.Register
         public void execute(RequestEventJson request)
         {
             validate(request);
+
+            var dbContext = new PassInDbContext();
+
+            var entity = new Event
+            {
+                Title = request.Title,
+                Details = request.Details,
+                Maximum_Attendees = request.MaximumAttendees,
+                Slug = request.Title.ToLower().Replace(" ","-")
+               
+            };
+
+            dbContext.Events.Add(entity);
+            dbContext.SaveChanges();
+
         }
+
 
         private void validate(RequestEventJson request)
         {
