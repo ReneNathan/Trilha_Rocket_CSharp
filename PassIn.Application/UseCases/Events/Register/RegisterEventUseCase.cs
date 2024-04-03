@@ -1,4 +1,5 @@
 ﻿using PassIn.Communication.Requests;
+using PassIn.Communication.Responses;
 using PassIn.Exceptions;
 using PassIn.Infrastructure;
 using PassIn.Infrastructure.Entidades;
@@ -7,7 +8,7 @@ namespace PassIn.Application.UseCases.Events.Register
 {
     public class RegisterEventUseCase
     {
-        public void execute(RequestEventJson request)
+        public ResponseRegisteredEventJson execute(RequestEventJson request)
         {
             validate(request);
 
@@ -19,11 +20,16 @@ namespace PassIn.Application.UseCases.Events.Register
                 Details = request.Details,
                 Maximum_Attendees = request.MaximumAttendees,
                 Slug = request.Title.ToLower().Replace(" ","-")
-               
             };
 
             dbContext.Events.Add(entity);
             dbContext.SaveChanges();
+
+
+            return new ResponseRegisteredEventJson
+            {
+                Id = entity.Id
+            };
 
         }
 
