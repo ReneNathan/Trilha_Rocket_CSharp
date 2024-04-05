@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using PassIn.Communication.Responses;
 using PassIn.Exceptions;
@@ -14,7 +15,7 @@ namespace PassIn.Api.Filters
 
             if (result)
             {
-                HandleProjectException();
+                HandleProjectException(context);
             }
             else
             {
@@ -24,8 +25,17 @@ namespace PassIn.Api.Filters
 
         private void HandleProjectException(ExceptionContext context)
         {
-            context.HttpContext.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
-            context.Result = new ObjectResult(new ResponseErrorJson(context.Exception.Message));
+            if (context.Exception is NotFoundException)
+            {
+                context.HttpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                context.Result = new NotFoundObjectResult(new ResponseErrorJson(context.Exception.Message));
+            }
+            else if (context.Exception is ErrorOnValidationException)
+            {
+                context.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                context.Result = new BadRequestObjectResult(new ResponseErrorJson(context.Exception.Message));
+            }
+
         }
 
         private void ThrowUnknowError(ExceptionContext context)
